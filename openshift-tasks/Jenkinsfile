@@ -48,19 +48,23 @@ podTemplate(
         sh "${mvnCmd} clean package -DskipTests=true"
       }
 
-      stages('Unit Test And Code Analysis') {
+      stage('Unit Test And Code Analysis') {
         // TBD: The next two stages should run in parallel
         parallel {
           // Using Maven run the unit tests
           stage('Unit Tests') {
-            echo "Running Unit Tests"
-            sh "${mvnCmd} test"
+            steps {
+              echo "Running Unit Tests"
+              sh "${mvnCmd} test"
+            }
           }
 
           // Using Maven to call SonarQube for Code Analysis
           stage('Code Analysis') {
-            echo "Running Code Analysis"
-            sh "${mvnCmd} sonar:sonar -Dsonar.host.url=http://sonarqube-gpte-hw-cicd.apps.na311.openshift.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME} -Dsonar.projectVersion=${devTag}"
+            steps {
+              echo "Running Code Analysis"
+              sh "${mvnCmd} sonar:sonar -Dsonar.host.url=http://sonarqube-gpte-hw-cicd.apps.na311.openshift.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME} -Dsonar.projectVersion=${devTag}"
+            }
           }
         }
       }
