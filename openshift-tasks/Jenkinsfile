@@ -85,7 +85,7 @@ podTemplate(
             openshift.withCluster() {
               openshift.withProject("${devProject}") {
                 openshift.set("image", "dc/tasks", "tasks=docker-registry.default.svc:5000/${devProject}/tasks:${devTag}")
-                openshift.set("env", "dc/tasks", "VERSION=${devTag} (tasks-dev)")
+                openshift.set("env", "dc/tasks", "VERSION='${devTag} (tasks-dev)'")
                 openshift.selector('configmap', 'tasks-config').delete()
 
                 def configmap = openshift.create('configmap', 'tasks-config', '--from-file=./configuration/application-users.properties', '--from-file=./configuration/application-roles.properties' )
@@ -140,7 +140,7 @@ podTemplate(
               dc.spec.template.spec.containers[0].image="docker-registry.default.svc:5000/${devProject}/tasks:${prodTag}"
               openshift.apply(dc)
 
-              openshift.set("env", "dc/${destApp}", "VERSION=${prodTag} (${destApp})")
+              openshift.set("env", "dc/${destApp}", "VERSION='${prodTag} (${destApp})'")
     
               // Update Config Map in change config files changed in the source
               openshift.selector("configmap", "${destApp}-config").delete()
