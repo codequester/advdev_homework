@@ -33,8 +33,8 @@ podTemplate(
       def version = getVersionFromPom("pom.xml")
 
       // Set Development and Production Project Names
-      def devProject  = "sha-tasks-dev"
-      def prodProject = "sha-tasks-prod"
+      def devProject  = "${GUID}-tasks-dev"
+      def prodProject = "${GUID}-tasks-prod"
 
       // TBD Set the tag for the development image: version + build number
       def devTag  = "${version}-" + currentBuild.number
