@@ -158,6 +158,21 @@ podTemplate(
                 sleep 5
                 rc_prod = openshift.selector("rc", "${destApp}-${dc_version}").object()
               }
+            }
+          }
+        }
+      }
+
+      stage('Switch over to new Version') {
+        echo "Switching Production application to ${destApp}."
+        //input "Switch Production?"
+        script {
+          openshift.withCluster() {
+            openshift.withProject("${prodProject}") {
+              def route = openshift.selector("route/tasks").object()
+              route.spec.to.name="${destApp}"
+              openshift.apply(route)
+
               def tasksRoute = sh(returnStdout: true, script: "curl tasks-a1d4-tasks-prod.apps.na311.openshift.opentlc.com").trim()
               echo "${tasksRoute}"
               if (tasksRoute.contains("tasks-green")) {
@@ -167,20 +182,7 @@ podTemplate(
               } else {
                 echo "NEITHER"
               }
-            }
-          }
-        }
-      }
 
-      stage('Switch over to new Version') {
-        echo "Switching Production application to ${destApp}."
-        input "Switch Production?"
-        script {
-          openshift.withCluster() {
-            openshift.withProject("${prodProject}") {
-              def route = openshift.selector("route/tasks").object()
-              route.spec.to.name="${destApp}"
-              openshift.apply(route)
             }
           }
         }
