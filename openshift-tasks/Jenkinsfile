@@ -158,6 +158,15 @@ podTemplate(
                 sleep 5
                 rc_prod = openshift.selector("rc", "${destApp}-${dc_version}").object()
               }
+              def tasksRoute = sh(returnStdout: true, script: "curl tasks-a1d4-tasks-prod.apps.na311.openshift.opentlc.com").trim()
+              echo "${tasksRoute}"
+              if (tasksRoute.contains("tasks-green")) {
+                echo "*** tasks-green validated successfully."
+              }else if (tasksRoute.contains("tasks-blue")) {
+                echo "*** tasks-blue returned unexpected name."
+              } else {
+                echo "NEITHER"
+              }
             }
           }
         }
