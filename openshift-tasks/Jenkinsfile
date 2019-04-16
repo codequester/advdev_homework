@@ -6,7 +6,7 @@ podTemplate(
   containers: [
     containerTemplate(
       name: "jnlp",
-      image: "docker-registry.default.svc:5000/a1d4-jenkins/jenkins-agent-appdev",
+      image: "docker-registry.default.svc:5000/${GUID}-jenkins/jenkins-agent-appdev",
       resourceRequestMemory: "1Gi",
       resourceLimitMemory: "2Gi",
       resourceRequestCpu: "1",
@@ -38,8 +38,8 @@ podTemplate(
       def version = getVersionFromPom("pom.xml")
 
       // Set Development and Production Project Names
-      def devProject  = "a1d4-tasks-dev"
-      def prodProject = "a1d4-tasks-prod"
+      def devProject  = "${GUID}-tasks-dev"
+      def prodProject = "${GUID}-tasks-prod"
 
       // TBD Set the tag for the development image: version + build number
       def devTag  = "${version}-" + currentBuild.number
@@ -175,17 +175,6 @@ podTemplate(
               def route = openshift.selector("route/tasks").object()
               route.spec.to.name="${destApp}"
               openshift.apply(route)
-
-              def tasksRoute = sh(returnStdout: true, script: "curl tasks-a1d4-tasks-prod.apps.na311.openshift.opentlc.com").trim()
-              echo "${tasksRoute}"
-              if (tasksRoute.contains("tasks-green")) {
-                echo "*** tasks-green validated successfully."
-              }else if (tasksRoute.contains("tasks-blue")) {
-                echo "*** tasks-blue validated successfully."
-              } else {
-                echo "NEITHER"
-              }
-
             }
           }
         }
