@@ -178,14 +178,29 @@ podTemplate(
 
               def tasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-prod.apps.${CLUSTER}").trim()
               echo "${tasksRoute}"
-              if (tasksRoute.contains("tasks-green")) {
-                echo "*** tasks-green validated successfully."
-              }else if (tasksRoute.contains("tasks-blue")) {
-                echo "*** tasks-blue validated successfully."
-              } else {
-                echo "NEITHER"
+              def shouldLoop = true
+              while (shouldLoop) {
+                if (tasksRoute.contains("tasks-green")) {
+                  echo "*** tasks-green validated successfully."
+                  shouldLoop = false
+                } else if (tasksRoute.contains("tasks-blue")) {
+                  echo "*** tasks-blue validated successfully."
+                  shouldLoop =false
+                } else {
+                  echo "App might not be ready to serve traffic. Retry after a few"
+                  sleep 10
+                  tasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-prod.apps.${CLUSTER}").trim()
+                }
               }
-              sleep 10
+
+              // if (tasksRoute.contains("tasks-green")) {
+              //   echo "*** tasks-green validated successfully."
+              // }else if (tasksRoute.contains("tasks-blue")) {
+              //   echo "*** tasks-blue validated successfully."
+              // } else {
+              //   echo "NEITHER"
+              // }
+              
             }
           }
         }
