@@ -19,6 +19,11 @@ podTemplate(
     // settings for our Nexus installation
     def mvnCmd = "mvn -s ../nexus_settings.xml"
 
+      // Blue/Green Deployment into Production
+      // -------------------------------------
+      def destApp   = "tasks-green"
+      def activeApp = ""
+
     // Checkout Source Code.
     stage('Checkout Source') {
       checkout scm
@@ -118,10 +123,6 @@ podTemplate(
         }
       }
 
-      // Blue/Green Deployment into Production
-      // -------------------------------------
-      def destApp   = "tasks-green"
-      def activeApp = ""
 
       stage('Blue/Green Production Deployment') {
         echo "Blue/Green Deployment"
@@ -144,6 +145,7 @@ podTemplate(
     
               // Update Config Map in change config files changed in the source
               openshift.selector("configmap", "${destApp}-config").delete()
+              echo "Configmap ${destApp}-config deleted"
               def configmap = openshift.create("configmap", "${destApp}-config", "--from-file=./configuration/application-users.properties", "--from-file=./configuration/application-roles.properties" )
     
               // Deploy the inactive application.
@@ -155,7 +157,7 @@ podTemplate(
               def rc_prod = openshift.selector("rc", "${destApp}-${dc_version}").object()
               echo "Waiting for ${destApp} to be ready"
               while (rc_prod.spec.replicas != rc_prod.status.readyReplicas) {
-                sleep 5
+                sleep 10 
                 rc_prod = openshift.selector("rc", "${destApp}-${dc_version}").object()
               }
             }
@@ -167,6 +169,7 @@ podTemplate(
         echo "Switching Production application to ${destApp}."
         //input "Switch Production?"
         script {
+          sleep 10
           openshift.withCluster() {
             openshift.withProject("${prodProject}") {
               def route = openshift.selector("route/tasks").object()
@@ -178,7 +181,7 @@ podTemplate(
               if (tasksRoute.contains("tasks-green")) {
                 echo "*** tasks-green validated successfully."
               }else if (tasksRoute.contains("tasks-blue")) {
-                echo "*** tasks-blue returned unexpected name."
+                echo "*** tasks-blue validated successfully."
               } else {
                 echo "NEITHER"
               }
