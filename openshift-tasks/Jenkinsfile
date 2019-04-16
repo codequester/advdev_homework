@@ -175,6 +175,17 @@ podTemplate(
               def route = openshift.selector("route/tasks").object()
               route.spec.to.name="${destApp}"
               openshift.apply(route)
+
+              def tasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-prod.apps.${CLUSTER}").trim()
+              echo "${tasksRoute}"
+              if (tasksRoute.contains("tasks-green")) {
+                echo "*** tasks-green validated successfully."
+              }else if (tasksRoute.contains("tasks-blue")) {
+                echo "*** tasks-blue validated successfully."
+              } else {
+                echo "NEITHER"
+              }
+              sleep 10
             }
           }
         }
