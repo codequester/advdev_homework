@@ -2,4 +2,4 @@
 
 == Tasks Demo Application
 
-This is an example JEE application used for the Advanced OpenShift Development Homework Assignment to show case the CICD pipeline automation using openshift and jenkins. The application can and the pipeline as code can be found 
+This is an example JEE application used for the Advanced OpenShift Development Homework Assignment to show case the CICD pipeline automation using openshift and jenkins.
